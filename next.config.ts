@@ -1,22 +1,20 @@
 import type { NextConfig } from "next";
 
-const nextConfig = {
-  /* config options here */
+const nextConfig: NextConfig = {
+  // config options here
+  // If you need images config, uncomment
   // images: {
   //   remotePatterns: [
   //     {
   //       protocol: "https",
   //       hostname: "ik.imagekit.io",
-  //       port: "",
   //     },
   //   ],
   // },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+
   typescript: {
     ignoreBuildErrors: true,
   },
 };
 
-export default nextConfig as unknown as NextConfig;
+export default nextConfig;
