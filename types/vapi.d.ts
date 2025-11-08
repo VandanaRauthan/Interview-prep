@@ -33,14 +33,16 @@ interface FunctionCallMessage extends BaseMessage {
     name: string;
     parameters: unknown;
   };
+  functionCallId?: string;
 }
 
 interface FunctionCallResultMessage extends BaseMessage {
   type: MessageTypeEnum.FUNCTION_CALL_RESULT;
-  functionCallResult: {
-    forwardToClientEnabled?: boolean;
-    result: unknown;
-    [a: string]: unknown;
+  functionCallId: string;
+  result: {
+    success?: boolean;
+    message?: string;
+    [key: string]: unknown;
   };
 }
 
