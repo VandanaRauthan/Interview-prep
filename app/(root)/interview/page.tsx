@@ -1,15 +1,18 @@
-import Agent from "@/components/Agent";
+import InterviewForm from "@/components/InterviewForm";
 import { getCurrentUser } from "@/lib/actions/auth.action";
+import { redirect } from "next/navigation";
 
 const Page = async () => {
   const user = await getCurrentUser();
 
-  return (
-    <>
-      <h3>Interview generation</h3>
+  if (!user) {
+    redirect("/sign-in");
+  }
 
-      <Agent userName={user?.name!} userId={user?.id ?? ""} type="generate" />
-    </>
+  return (
+    <div className="container mx-auto py-8">
+      <InterviewForm userId={user.id} />
+    </div>
   );
 };
 

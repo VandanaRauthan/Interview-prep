@@ -34,6 +34,14 @@ export async function POST(request: Request) {
       userid,
     });
 
+    if (!role || !level || !techstack || !type || !amount || !userid) {
+      console.error("Missing required parameters");
+      return Response.json(
+        { success: false, error: "Missing required parameters" },
+        { status: 400 }
+      );
+    }
+
     // Generate questions using Google Gemini
     const { text: questions } = await generateText({
       model: google("gemini-2.0-flash-001"),
@@ -52,6 +60,8 @@ export async function POST(request: Request) {
     `,
     });
 
+    console.log("Generated questions:", questions);
+
     // Parse questions and create interview document
     const parsedQuestions = JSON.parse(questions);
 
@@ -66,6 +76,8 @@ export async function POST(request: Request) {
       coverImage: getRandomInterviewCover(),
       createdAt: new Date().toISOString(),
     };
+
+    console.log("Creating interview document:", interview);
 
     // Save to Firestore
     const docRef = await db.collection("interviews").add(interview);
@@ -90,38 +102,24 @@ export async function POST(request: Request) {
     } else {
       // Client-side format (local)
       return Response.json(
-        { success: true, interviewId: docRef.id },
+        {
+          success: true,
+          interviewId: docRef.id,
+          message: "Interview generated successfully",
+        },
         { status: 200 }
       );
     }
   } catch (error) {
     console.error("Error generating interview:", error);
 
-    const body = await request.json().catch(() => ({}));
-
-    if (body.message?.functionCall) {
-      // VAPI format
-      return Response.json(
-        {
-          results: [
-            {
-              success: false,
-              error: error instanceof Error ? error.message : "Unknown error",
-            },
-          ],
-        },
-        { status: 500 }
-      );
-    } else {
-      // Client format
-      return Response.json(
-        {
-          success: false,
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
-        { status: 500 }
-      );
-    }
+    return Response.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }
 

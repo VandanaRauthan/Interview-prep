@@ -9,16 +9,31 @@ import {
   getLatestInterviews,
 } from "@/lib/actions/general.action";
 
+// Force dynamic rendering and disable caching
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function Home() {
   const user = await getCurrentUser();
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Please sign in to continue</p>
+      </div>
+    );
+  }
 
   const [userInterviews, allInterview] = await Promise.all([
     getInterviewsByUserId(user?.id!),
     getLatestInterviews({ userId: user?.id! }),
   ]);
 
-  const hasPastInterviews = userInterviews?.length! > 0;
-  const hasUpcomingInterviews = allInterview?.length! > 0;
+  const hasPastInterviews = userInterviews && userInterviews.length > 0;
+  const hasUpcomingInterviews = allInterview && allInterview.length > 0;
+
+  console.log("User interviews:", userInterviews?.length);
+  console.log("All interviews:", allInterview?.length);
 
   return (
     <>
@@ -26,11 +41,11 @@ async function Home() {
         <div className="flex flex-col gap-6 max-w-lg">
           <h2>Get Interview-Ready with AI-Powered Practice & Feedback</h2>
           <p className="text-lg">
-            Practice real interview questions & get instant feedback
+            Create custom interviews and practice with AI-powered feedback
           </p>
 
           <Button asChild className="btn-primary max-sm:w-full">
-            <Link href="/interview">Start an Interview</Link>
+            <Link href="/interview">Create an Interview</Link>
           </Button>
         </div>
 
@@ -44,7 +59,7 @@ async function Home() {
       </section>
 
       <section className="flex flex-col gap-6 mt-8">
-        <h2>Your Interviews</h2>
+        <h2>Your Interviews ({userInterviews?.length || 0})</h2>
 
         <div className="interviews-section">
           {hasPastInterviews ? (
@@ -60,13 +75,16 @@ async function Home() {
               />
             ))
           ) : (
-            <p>You haven&apos;t taken any interviews yet</p>
+            <p>
+              You haven&apos;t created any interviews yet. Click "Create an
+              Interview" to get started!
+            </p>
           )}
         </div>
       </section>
 
       <section className="flex flex-col gap-6 mt-8">
-        <h2>Take Interviews</h2>
+        <h2>Practice Interviews</h2>
 
         <div className="interviews-section">
           {hasUpcomingInterviews ? (
@@ -82,7 +100,7 @@ async function Home() {
               />
             ))
           ) : (
-            <p>There are no interviews available</p>
+            <p>No practice interviews available at the moment</p>
           )}
         </div>
       </section>
