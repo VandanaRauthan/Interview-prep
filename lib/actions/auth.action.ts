@@ -26,7 +26,7 @@ export async function setSessionCookie(idToken: string) {
 }
 
 export async function signUp(params: SignUpParams) {
-  const { uid, name, email } = params;
+  const { uid, name, email, profileURL } = params;
 
   try {
     // check if user exists in db
@@ -37,13 +37,16 @@ export async function signUp(params: SignUpParams) {
         message: "User already exists. Please sign in.",
       };
 
-    // save user to db
-    await db.collection("users").doc(uid).set({
-      name,
-      email,
-      // profileURL,
-      // resumeURL,
-    });
+    // save user to db with profile image
+    await db
+      .collection("users")
+      .doc(uid)
+      .set({
+        name,
+        email,
+        profileURL: profileURL || null,
+        createdAt: new Date().toISOString(),
+      });
 
     return {
       success: true,
@@ -68,19 +71,37 @@ export async function signUp(params: SignUpParams) {
 }
 
 export async function signIn(params: SignInParams) {
-  const { email, idToken } = params;
+  const { email, idToken, profileURL } = params;
 
   try {
     const userRecord = await auth.getUserByEmail(email);
-    if (!userRecord)
+    if (!userRecord) {
       return {
         success: false,
         message: "User does not exist. Create an account.",
       };
+    }
 
+    // If profileURL is provided (from Google sign-in), update it in the database
+    if (profileURL) {
+      await db.collection("users").doc(userRecord.uid).set(
+        {
+          profileURL,
+        },
+        { merge: true }
+      );
+    }
+
+    // Set the session cookie
     await setSessionCookie(idToken);
+
+    // Return success response
+    return {
+      success: true,
+      message: "Signed in successfully.",
+    };
   } catch (error: any) {
-    console.log("");
+    console.error("Sign in error:", error);
 
     return {
       success: false,
@@ -92,36 +113,57 @@ export async function signIn(params: SignInParams) {
 // Sign out user by clearing the session cookie
 export async function signOut() {
   const cookieStore = await cookies();
-
   cookieStore.delete("session");
+
+  return {
+    success: true,
+    message: "Signed out successfully.",
+  };
 }
 
 // Get current user from session cookie
 export async function getCurrentUser(): Promise<User | null> {
-  const cookieStore = await cookies();
-
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return null;
-
   try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session")?.value;
 
-    // get user info from db
-    const userRecord = await db
-      .collection("users")
-      .doc(decodedClaims.uid)
-      .get();
-    if (!userRecord.exists) return null;
+    if (!sessionCookie) {
+      console.warn("No session cookie found");
+      return null; // No session, return null
+    }
 
+    // Verify session cookie
+    let decodedClaims;
+    try {
+      decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
+    } catch (error: any) {
+      console.warn(
+        "Invalid session cookie. Session clearing must be handled in a Server Action or Route Handler."
+      );
+      return null;
+    }
+
+    // Fetch user info from Firestore
+    const userRef = db.collection("users").doc(decodedClaims.uid);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      console.warn("No user record found for UID:", decodedClaims.uid);
+      return null; // No user record, return null
+    }
+
+    // Return user data
+    const userData = userDoc.data();
     return {
-      ...userRecord.data(),
-      id: userRecord.id,
+      uid: decodedClaims.uid,
+      name: userData?.name || "",
+      email: userData?.email || "",
+      id: userDoc.id,
+      ...userData,
     } as User;
-  } catch (error) {
-    console.log(error);
-
-    // Invalid or expired session
-    return null;
+  } catch (error: any) {
+    console.error("Get current user error:", error);
+    return null; // Gracefully handle unexpected errors
   }
 }
 

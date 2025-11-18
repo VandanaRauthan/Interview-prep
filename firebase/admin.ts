@@ -1,6 +1,7 @@
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
+// removed storage admin usage
 
 // Initialize Firebase Admin SDK
 function initFirebaseAdmin() {
@@ -20,6 +21,7 @@ function initFirebaseAdmin() {
   return {
     auth: getAuth(),
     db: getFirestore(),
+    // no storage exported
   };
 }
 

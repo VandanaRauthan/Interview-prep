@@ -36,6 +36,7 @@ interface User {
   name: string;
   email: string;
   id: string;
+  profileURL?: string;
 }
 
 interface InterviewCardProps {
@@ -50,6 +51,7 @@ interface InterviewCardProps {
 interface AgentProps {
   userName: string;
   userId?: string;
+  userImage?: string;
   interviewId?: string;
   feedbackId?: string;
   type: "generate" | "interview";
@@ -74,13 +76,15 @@ interface GetLatestInterviewsParams {
 interface SignInParams {
   email: string;
   idToken: string;
+  profileURL?: string;
 }
 
 interface SignUpParams {
   uid: string;
   name: string;
   email: string;
-  password: string;
+  password?: string;
+  profileURL?: string;
 }
 
 type FormType = "sign-in" | "sign-up";

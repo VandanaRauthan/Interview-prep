@@ -24,6 +24,7 @@ interface SavedMessage {
 const Agent = ({
   userName,
   userId,
+  userImage,
   interviewId,
   feedbackId,
   questions,
@@ -111,7 +112,7 @@ const Agent = ({
       const timer = setTimeout(() => {
         console.log("Auto-ending call now");
         handleDisconnect();
-      }, 15000); // 15 seconds delay
+      }, 8000); // 15 seconds delay
 
       return () => clearTimeout(timer);
     }
@@ -252,7 +253,7 @@ const Agent = ({
         <div className="card-border">
           <div className="card-content">
             <Image
-              src="/user-avatar.png"
+              src={userImage || "/user-avatar.png"}
               alt="profile-image"
               width={539}
               height={539}
