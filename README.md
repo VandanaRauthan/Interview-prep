@@ -1,8 +1,4 @@
-# 🌸🤖 Prepwise — AI Interview Assistant (Anime Edition)
-
-<p align="center">  
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=24&pause=1000&color=FF9EC7&center=true&vCenter=true&width=600&lines=Prepwise+%7C+AI+Interview+Assistant;Next.js+%2B+Firebase+%2B+Vapi+%2B+Gemini;Level+up+your+interview+skills+🌸" />  
-</p>
+# 🌸🤖 Interview-prep — AI Interview Assistant
 
 ---
 
@@ -15,7 +11,7 @@ It blends modern UI, voice-based AI, and smooth interactions — giving a futuri
 
 ## ⚙️ Tech Stack 🌸
 
-<p align="center">🌸 ✧ Technologies that power Prepwise ✧ 🌸</p>
+<p align="center">🌸 ✧ Technologies that power Interview-prep ✧ 🌸</p>
 
 ### 💛 Languages  
 <p align="center">
